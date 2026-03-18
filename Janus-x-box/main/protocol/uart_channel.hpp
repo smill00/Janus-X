@@ -1,7 +1,6 @@
 // UartChannel.hpp
 #pragma once
 
-#include <cstdint>
 #include <functional>
 #include <mutex>
 #include <vector>
@@ -41,7 +40,7 @@ public:
      * @param callback 数据到达回调函数。当串口收到数据并成功读取后，会调用此函数。
      *                  注意：此回调在UART事件任务上下文中被调用，应保持简短，避免阻塞。
      */
-    UartChannel(const Config& config, DataReceivedCallback callback);
+    UartChannel(DataReceivedCallback callback);
     
     ~UartChannel();
 
@@ -81,6 +80,8 @@ public:
      * @brief 获取当前通道的配置。
      */
     const Config& get_config() const { return config_; }
+
+    void setConfig(const Config& config);
 
     /**
      * @brief 检查通道是否活跃。

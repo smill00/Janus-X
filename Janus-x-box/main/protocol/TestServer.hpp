@@ -13,6 +13,7 @@ protected:
 
 private:
     ProtocolCodec::ConnectState m_connect_state{ProtocolCodec::ConnectState::DISCONNECTED};
+    ProtocolCodec m_protocoler;
 };
 
 #endif // TESTSERVER_HPP

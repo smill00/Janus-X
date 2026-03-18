@@ -5,6 +5,8 @@
 #include <functional>
 #include <array>
 #include <thread>
+#include <stdint.h>
+#include "uart_channel.hpp"
 
 #include "ring_buffer.hpp"
 
@@ -12,7 +14,7 @@ class ProtocolCodec {
 public:
 
     static constexpr std::array<uint8_t, 3> PACKET_HEADER = {'*', '*', '*'};
-    static constexpr size_t MAX_PACKET_VALUE_LEN = 512;
+    static constexpr uint8_t MAX_PACKET_VALUE_LEN = 512;
     static constexpr uint8_t RESERVED_NC = 0x00;
 
     // 协议功能码 (Type)
@@ -51,6 +53,8 @@ public:
         uint32_t key;
         unsigned short len = 0;              
         uint8_t* value;
+
+
     };
 
     // 针对特定功能码的、更结构化的数据体定义（用于便捷构造和解析）
@@ -84,18 +88,21 @@ public:
     struct DataPkg {
         uint8_t* data;
         size_t len;
-        DataPkg(uint8_t* data, size_t len) {
-            this->data = data;
+        DataPkg(const uint8_t* data, size_t len) {
+            this->data = (uint8_t*)data;
             this->len = len;
         }
+
+        DataPkg() = default;
     };
 
     using PushPacketCallback = std::function<void(const Packet packet)>;
 public:
-    ProtocolCodec() = default;
-    ~ProtocolCodec() = default;
+    ProtocolCodec(PushPacketCallback push_callback);
 
-    void pushBuffer(uint8_t* buffer, size_t len);
+    ~ProtocolCodec() ;
+
+    void pushBuffer(const uint8_t* buffer, size_t len);
     void worker();
 
     void sendMsg(const Packet& packet);
@@ -104,4 +111,5 @@ private:
     RingBuffer<DataPkg> m_buffer;
     std::thread m_worker;
     PushPacketCallback m_push_packet_callback;
+    UartChannel m_channel;
 };

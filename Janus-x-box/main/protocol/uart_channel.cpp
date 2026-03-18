@@ -4,8 +4,7 @@
 
 static const char* TAG = "UartChannel";
 
-UartChannel::UartChannel(const Config& config, DataReceivedCallback callback)
-    : config_(config), user_callback_(std::move(callback)) {
+UartChannel::UartChannel(DataReceivedCallback callback): user_callback_(std::move(callback)) {
     // 构造函数主要进行配置校验和初始化
     if (!user_callback_) {
         ESP_LOGW(TAG, "UART%d: No callback provided. Data will be received but not processed.", config_.port_num);
@@ -129,6 +128,10 @@ int UartChannel::send(const uint8_t* data, size_t len) {
 
 int UartChannel::send(const std::vector<uint8_t>& data) {
     return send(data.data(), data.size());
+}
+
+void UartChannel::setConfig(const Config& config) {
+    config_ = config;
 }
 
 void UartChannel::flush_rx() {

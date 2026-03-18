@@ -5,7 +5,20 @@
 #include <cstdlib>
 #include <cstring>
 
-void ProtocolCodec::pushBuffer(uint8_t* buffer, size_t len) {
+ProtocolCodec::ProtocolCodec(PushPacketCallback push_callback):
+m_buffer(1000),
+m_push_packet_callback(push_callback),
+m_channel(std::bind(&ProtocolCodec::pushBuffer, this, std::placeholders::_1, std::placeholders::_2))
+{
+
+}
+
+ProtocolCodec::~ProtocolCodec()
+{
+
+}
+
+void ProtocolCodec::pushBuffer(const uint8_t* buffer, size_t len) {
     if(buffer == nullptr || len == 0) {
         return;
     }
@@ -27,6 +40,7 @@ void ProtocolCodec::sendMsg(const Packet& packet) {
     memcpy(buf + 5, &packet.key, sizeof(packet.key));
     memcpy(buf + 9, packet.value, packet.len);
     buf[9 + packet.len] = 0;
+    m_channel.send(buf, packet.len + 8);
 }
 
 void ProtocolCodec::worker() {

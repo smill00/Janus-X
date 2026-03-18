@@ -1,8 +1,9 @@
 #include "TestServer.hpp"
-CTestServer::CTestServer() {
+CTestServer::CTestServer():m_protocoler (std::bind(&CTestServer::recvPacket, this, std::placeholders::_1)) {
 
 }
 CTestServer::~CTestServer() {
+
 }
 
 void CTestServer::recvPacket(const ProtocolCodec::Packet& packet) {
