@@ -13,6 +13,9 @@
 *.bak
 *.tmp
 
+.cache
+.vscode
+
 # Log files
 *.log
 
