@@ -16,6 +16,10 @@
 # Log files
 *.log
 
+.idea
+
+cmake-build-debug
+
 # Build artifacts and directories
 **/build/
 build/
