@@ -3,7 +3,9 @@ idf_component_register(
         "main.cpp"
         "protocol/autotest_protocol.cpp"
         "protocol/TestServer.cpp"
-        "protocol/uart_channel.cpp"
+        "protocol/CChannel.cpp"
+        "protocol/CChannelEspIdfUart.cpp"
+        "protocol/CProtocol.cpp"
 
         INCLUDE_DIRS
         "."
