@@ -5,7 +5,9 @@ idf_component_register(
         "protocol/TestServer.cpp"
         "protocol/CChannel.cpp"
         "protocol/CChannelEspIdfUart.cpp"
-        "protocol/CProtocol.cpp"
+        "protocol/CMonitProtocol.cpp"
+        "protocol/CBlockQueue.hpp"
+        "protocol/CProtocol.hpp"
 
         INCLUDE_DIRS
         "."

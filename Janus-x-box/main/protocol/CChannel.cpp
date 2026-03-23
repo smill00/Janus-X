@@ -85,7 +85,7 @@ bool CChannel::reset() {
     return true;
 }
 
-int CChannel::readData(char *data, int maxlen) {
+int CChannel::readData(uint8_t *data, int maxlen) {
     std::unique_lock<std::mutex> lock(m_mutex);
     m_data_available_cv.wait(lock, [this]() {
         return m_write_pos > m_read_pos || !m_is_run;
@@ -107,6 +107,19 @@ int CChannel::readData(char *data, int maxlen) {
 
     return read_len;
 }
+
+int CChannel::readnData(uint8_t* data, int len) {
+    int total_read = 0;
+    while (total_read < len) {
+        int read_len = readData(data + total_read, len - total_read);
+        if (read_len <= 0) {
+            return total_read;
+        }
+        total_read += read_len;
+    }
+    return len;
+}
+
 
 #if TARGE_PLATFORM_POSIX
 bool CChannel::writeData(const char *data, int len) {

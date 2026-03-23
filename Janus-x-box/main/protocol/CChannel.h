@@ -18,7 +18,8 @@ public:
     CChannel(const CChannel&) = delete;
     CChannel& operator=(const CChannel&) = delete;
 
-    int readData(char *data, int maxlen);
+    int readData(uint8_t *data, int maxlen);
+    int readnData(uint8_t *data, int len);
 
 #if TARGE_PLATFORM_POSIX
     bool writeData(const char *data, int len);
