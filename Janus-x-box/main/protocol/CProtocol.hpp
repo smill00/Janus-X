@@ -80,39 +80,40 @@ public:
                         }
                     }
                     break;
-                case E_LENGTH:
-                    {
-                        uint8_t data[m_cfg.fun_len];
-                        if (m_channel->readnData(data, m_cfg.fun_len) != m_cfg.fun_len)
-                        {
-                            state = E_HEAD;
-                            break;
-                        }
-                        msg.len = data[0] << 8 | data[1];
-                        if (msg.len < 0 || msg.len > 1024)
-                        {
-                            state = E_HEAD;
-                            break;
-                        }
-                        msg.type = data[2];
-                        msg.key = (uint32_t)data[4] << 24 | (uint32_t)data[5] << 16 | (uint32_t)data[6] << 8 | (
-                            uint32_t)data[7];
-                        state = E_BODY;
-                    }
-                    break;
-                case E_BODY:
-                    {
-                        msg.data = new uint8_t[msg.len];
-                        if (m_channel->readnData(msg.data, msg.len) != msg.len)
-                        {
-                            if (msg.data != nullptr)
-                            {
-                                delete [] msg.data;
-                            }
-                            state = E_HEAD;
-                            break;
-                        }
-                    }
+                // case E_LENGTH:
+                //     {
+                //         if (m_channel->readnData(pkg.fundata, m_cfg.fun_len) != m_cfg.fun_len) {
+                //             state = E_HEAD;
+                //             break;
+                //         }
+                //
+                //         pkg.data_len = build_key_from_bytes(pkg.fundata+m_cfg.len_index, m_cfg.len_len, m_cfg.mode);
+                //
+                //
+                //         msg.len = data[0] << 8 | data[1];
+                //         if (msg.len < 0 || msg.len > 1024)
+                //         {
+                //             state = E_HEAD;
+                //             break;
+                //         }
+                //         msg.type = data[2];
+                //         msg.key = (uint32_t)data[4] << 24 | (uint32_t)data[5] << 16 | (uint32_t)data[6] << 8 | (uint32_t)data[7];
+                //         state = E_BODY;
+                //     }
+                //     break;
+                // case E_BODY:
+                //     {
+                //         msg.data = new uint8_t[msg.len];
+                //         if (m_channel->readnData(msg.data, msg.len) != msg.len)
+                //         {
+                //             if (msg.data != nullptr)
+                //             {
+                //                 delete [] msg.data;
+                //             }
+                //             state = E_HEAD;
+                //             break;
+                //         }
+                //     }
                 }
             }
         });
@@ -120,6 +121,26 @@ public:
     }
 
     bool stop() { return true; }
+
+    int build_key_from_bytes(const uint8_t* data, size_t offset, size_t byte_count, EByteSort mode) {
+        int result = 0;
+
+        if (byte_count > 4) {
+            byte_count = 4; // 限制最多4字节
+        }
+
+        if (mode == E_BIG) { // 大端序
+            for (size_t i = 0; i < byte_count; i++) {
+                result |= (int)data[offset + i] << (8 * (byte_count - 1 - i));
+            }
+        } else { // 小端序
+            for (size_t i = 0; i < byte_count; i++) {
+                result |= (int)data[offset + i] << (8 * i);
+            }
+        }
+
+        return result;
+    }
 
 private:
     std::thread m_worker;
