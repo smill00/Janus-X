@@ -48,6 +48,9 @@ public:
     virtual ~CProtocol(){}
 
     virtual T parse(const SDataPacket& packet) = 0;
+    virtual T pull() {
+        return m_queue.pop();
+    }
 
     bool start() {
         m_worker = std::thread([this]()
@@ -113,7 +116,7 @@ public:
 
     bool stop() { return true; }
 
-    int build_key_from_bytes(const uint8_t* data, size_t offset, size_t byte_count, EByteSort mode) {
+    int build_key_from_bytes(const uint8_t* data, size_t byte_count, EByteSort mode) {
         int result = 0;
 
         if (byte_count > 4) {
@@ -122,11 +125,11 @@ public:
 
         if (mode == E_BIG) { // 大端序
             for (size_t i = 0; i < byte_count; i++) {
-                result |= (int)data[offset + i] << (8 * (byte_count - 1 - i));
+                result |= (int)data[i] << (8 * (byte_count - 1 - i));
             }
         } else { // 小端序
             for (size_t i = 0; i < byte_count; i++) {
-                result |= (int)data[offset + i] << (8 * i);
+                result |= (int)data[i] << (8 * i);
             }
         }
 

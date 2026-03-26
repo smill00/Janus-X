@@ -11,8 +11,9 @@ class Test {
         }
 
         void print() {
+
             int count = 0;
-            while(1) {
+            while(true) {
                 printf("Hello esp32! This is ESP32CPP+ #%d\n", ++count);
                 std::cout << "CPP hello world" << std::endl;
                 vTaskDelay(1000 / portTICK_PERIOD_MS); // 延时1秒
@@ -24,5 +25,6 @@ extern "C" void app_main(void)
 {
     Test test;
     test.print();
+
     return;
 }

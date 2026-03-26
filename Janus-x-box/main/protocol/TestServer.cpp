@@ -3,13 +3,31 @@
 
 server::server()
 {
+    m_protocol = new CMonitProtocol;
 }
 
-server::~server()
-{
+server::~server() {
+    if (m_protocol) {
+        m_protocol->stop();
+        delete m_protocol;
+    }
 }
 
-int server::run()
+bool server::start() {
+    m_protocol->start();
+    m_worker = std::thread([this](){
+        SMsg msg = m_protocol->pull();
+        handleMessage(msg);
+    });
+    return true;
+}
+
+void server::stop()
 {
-    return 0;
+
+}
+
+void server::handleMessage(SMsg message)
+{
+
 }

@@ -10,11 +10,11 @@
 struct SMsg {
     uint8_t type;
     int key;
-    short len;
+    int len;
     uint8_t* data;
 };
 
-static uint8_t HEAD[3] = {0x5A,0xA5,0x5A};
+static uint8_t HEAD[3] = {0x5A,0x1A,0x5A};
 
 class CMonitProtocol : public CProtocol<SMsg>{
 public:

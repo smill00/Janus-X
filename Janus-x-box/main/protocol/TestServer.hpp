@@ -1,15 +1,25 @@
 #ifndef TESTSERVER_HPP
 #define TESTSERVER_HPP
-#include "CProtocol.hpp"
+#include "CMonitProtocol.h"
 class server {
 public:
+    enum EState {
+        DISCONNECTED,
+        STANDBY,
+        LISTENING
+    };
+
     server();
     ~server();
 
-    int run();
+    bool start();
+    void stop();
 
 private:
-    //CProtocol* m_pProtocol = nullptr;
+    void handleMessage(SMsg message);
+    CMonitProtocol* m_protocol = nullptr;
+    std::thread m_worker;
+    EState m_state = DISCONNECTED;
 };
 
 

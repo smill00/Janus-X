@@ -6,6 +6,7 @@ idf_component_register(
         "protocol/CChannel.cpp"
         "protocol/CChannelEspIdfUart.cpp"
         "protocol/CMonitProtocol.cpp"
+        "protocol/CConfig.cpp"
         "protocol/CBlockQueue.hpp"
         "protocol/CProtocol.hpp"
 
