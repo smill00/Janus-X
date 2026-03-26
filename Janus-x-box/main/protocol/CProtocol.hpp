@@ -47,7 +47,7 @@ public:
     CProtocol(SProtocolConfig cfg) : m_channel(nullptr), m_running(false),m_cfg(cfg) {}
     virtual ~CProtocol(){}
 
-    virtual T parse(SDataPacket packet) = 0;
+    virtual T parse(const SDataPacket& packet) = 0;
 
     bool start() {
         m_worker = std::thread([this]()
@@ -55,7 +55,7 @@ public:
             enum ParseState
             {
                 E_HEAD,
-                E_LENGTH,
+                E_FUN,
                 E_BODY
             };
 
@@ -75,45 +75,36 @@ public:
                             }
                             if (i == m_cfg.head_len - 1)
                             {
-                                state = E_LENGTH;
+                                state = E_FUN;
                             }
                         }
-                    }
-                    break;
-                // case E_LENGTH:
-                //     {
-                //         if (m_channel->readnData(pkg.fundata, m_cfg.fun_len) != m_cfg.fun_len) {
-                //             state = E_HEAD;
-                //             break;
-                //         }
-                //
-                //         pkg.data_len = build_key_from_bytes(pkg.fundata+m_cfg.len_index, m_cfg.len_len, m_cfg.mode);
-                //
-                //
-                //         msg.len = data[0] << 8 | data[1];
-                //         if (msg.len < 0 || msg.len > 1024)
-                //         {
-                //             state = E_HEAD;
-                //             break;
-                //         }
-                //         msg.type = data[2];
-                //         msg.key = (uint32_t)data[4] << 24 | (uint32_t)data[5] << 16 | (uint32_t)data[6] << 8 | (uint32_t)data[7];
-                //         state = E_BODY;
-                //     }
-                //     break;
-                // case E_BODY:
-                //     {
-                //         msg.data = new uint8_t[msg.len];
-                //         if (m_channel->readnData(msg.data, msg.len) != msg.len)
-                //         {
-                //             if (msg.data != nullptr)
-                //             {
-                //                 delete [] msg.data;
-                //             }
-                //             state = E_HEAD;
-                //             break;
-                //         }
-                //     }
+                    }break;
+                case E_FUN:
+                    {
+                        if (m_channel->readnData(pkg.fundata, m_cfg.fun_len) != m_cfg.fun_len) {
+                            state = E_HEAD;
+                            break;
+                        }
+
+                        pkg.data_len = build_key_from_bytes(pkg.fundata+m_cfg.len_index, m_cfg.len_len, m_cfg.mode);
+                        state = E_BODY;
+                    }break;
+                case E_BODY:
+                    {
+                        if (m_channel->readnData(pkg.data, pkg.data_len) != pkg.data_len)
+                        {
+                            if (pkg.fundata != nullptr)
+                            {
+                                delete [] pkg.fundata;
+                            }
+                            state = E_HEAD;
+                            break;
+                        }
+
+                        T msg = parse(pkg);
+                        m_queue.push(msg);
+                        state = E_HEAD;
+                    }break;
                 }
             }
         });

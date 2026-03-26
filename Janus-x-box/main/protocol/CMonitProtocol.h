@@ -13,10 +13,15 @@ struct SMsg {
     short len;
     uint8_t* data;
 };
+
+static uint8_t HEAD[3] = {0x5A,0xA5,0x5A};
+
 class CMonitProtocol : public CProtocol<SMsg>{
 public:
     CMonitProtocol();
     ~CMonitProtocol();
+
+    SMsg parse(const SDataPacket& packet) override;
 private:
 
 };
