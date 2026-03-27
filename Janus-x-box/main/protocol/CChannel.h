@@ -42,13 +42,18 @@ protected:
 
     std::atomic_bool m_is_run = false;
 
+    bool m_is_init = false;
+
 private:
+
     int m_read_pos = 0;
     int m_write_pos = 0;
 
     int m_buf_size = 0;
     int m_read_size = 0;
     char* m_buffer = nullptr;
+
+
 
     std::thread m_thread;
     std::mutex m_mutex;                           // 保护缓冲区和指针

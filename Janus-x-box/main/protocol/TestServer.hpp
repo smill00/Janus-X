@@ -13,10 +13,11 @@ public:
     ~server();
 
     bool start();
-    void stop();
 
 private:
-    void handleMessage(SMsg message);
+    void reset();
+    void handshake(SMsg& message);
+
     CMonitProtocol* m_protocol = nullptr;
     std::thread m_worker;
     EState m_state = DISCONNECTED;

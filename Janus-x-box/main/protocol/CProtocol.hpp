@@ -114,7 +114,10 @@ public:
         return true;
     }
 
-    bool stop() { return true; }
+    bool reset() {
+        m_channel->reset();
+        return true;
+    }
 
     int build_key_from_bytes(const uint8_t* data, size_t byte_count, EByteSort mode) {
         int result = 0;

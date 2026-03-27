@@ -4,19 +4,26 @@
 
 #ifndef JANUS_X_BOX_CCONFIG_H
 #define JANUS_X_BOX_CCONFIG_H
-#include <string>
+
 
 #include "nvs_flash.h"
 #include "nvs.h"
 #include "esp_log.h"
+#include <string>
+
+enum LISTEN_MODE {
+    LISTEN_SERIAL,
+    LISTEN_AP,
+    LISTEN_ETHERNET
+};
 
 struct SSystemConfig {
     std::string name;
     std::string version;
     std::string device_id;
     std::string author;
-    int mode;
-    int ch_def;
+    LISTEN_MODE mode;
+    int8_t ch_def;
 };
 
 struct NetConfig {
@@ -42,7 +49,7 @@ public:
     CConfig();
     ~CConfig();
 
-    static void handle_system_reset_flag();
+    void init();
 
     static void writeSystemConfig(const SSystemConfig& cfg);
     static SSystemConfig readSystemConfig();
@@ -50,7 +57,8 @@ public:
     static bool writeNetConfig(const char* namespace_name, const NetConfig& config);
     static NetConfig readNetConfig(const char* namespace_name);
 
-
+    static bool writeUartConfig(const SUartConfig& config);
+    static SUartConfig readUartConfig();
 };
 
 

@@ -25,6 +25,10 @@ std::string CChannelEspIdfUart::descr() {
 }
 
 bool CChannelEspIdfUart::init() {
+    if (m_is_init) {
+        unInit();
+    }
+
     esp_err_t err;
 
     // 配置UART参数
@@ -63,10 +67,12 @@ bool CChannelEspIdfUart::init() {
     }
 
     ESP_LOGI(TAG, "UART%d initialized successfully", m_uart_num);
+    m_is_init = true;
     return true;
 }
 
 bool CChannelEspIdfUart::unInit() {
+    m_is_init = false;
     esp_err_t err = uart_driver_delete(m_uart_num);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "uart_driver_delete failed: %s", esp_err_to_name(err));

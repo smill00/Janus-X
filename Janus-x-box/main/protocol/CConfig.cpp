@@ -14,7 +14,8 @@ CConfig::~CConfig()
 {
 }
 
-void CConfig::handle_system_reset_flag() {
+void CConfig::init()
+{
     nvs_handle_t handle;
     uint8_t reset_value = 0;
 
@@ -198,14 +199,14 @@ SSystemConfig CConfig::readSystemConfig() {
     }
 
     // 4. 读取整数字段
-    int32_t temp = 0;
+    int8_t temp = 0;
 
-    err = nvs_get_i32(handle, "mode", &temp);
+    err = nvs_get_i8(handle, "mode", &temp);
     if (err == ESP_OK) {
         cfg.mode = temp;
     }
 
-    err = nvs_get_i32(handle, "ch_def", &temp);
+    err = nvs_get_i8(handle, "ch_def", &temp);
     if (err == ESP_OK) {
         cfg.ch_def = temp;
     }
@@ -386,5 +387,140 @@ NetConfig CConfig::readNetConfig(const char* namespace_name) {
         ESP_LOGW(TAG, "从命名空间 '%s' 读取NetConfig不完整", namespace_name);
     }
 
+    return config;
+}
+
+// 写入SUartConfig到指定命名空间
+bool CConfig::writeUartConfig( const SUartConfig& config) {
+    char* namespace_name = "UartCfg";
+    nvs_handle_t handle;
+    esp_err_t err;
+    bool all_success = true;
+
+    // 1. 打开指定命名空间
+    err = nvs_open(namespace_name, NVS_READWRITE, &handle);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "无法打开命名空间 '%s': %s", namespace_name, esp_err_to_name(err));
+        return false;
+    }
+
+    // 2. 存储整数字段
+    err = nvs_set_i32(handle, "uart_number", config.number);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "存储 uart_number 失败: %s", esp_err_to_name(err));
+        all_success = false;
+    }
+
+    err = nvs_set_i32(handle, "uart_baud", config.baud_rate);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "存储 uart_baud 失败: %s", esp_err_to_name(err));
+        all_success = false;
+    }
+
+    err = nvs_set_i32(handle, "uart_stopbit", config.stop_bit);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "存储 uart_stopbit 失败: %s", esp_err_to_name(err));
+        all_success = false;
+    }
+
+    err = nvs_set_i32(handle, "uart_parity", config.parity);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "存储 uart_parity 失败: %s", esp_err_to_name(err));
+        all_success = false;
+    }
+
+    // 3. 存储字符串字段 (uart_name)
+    if (!config.name.empty()) {
+        err = nvs_set_str(handle, "uart_name", config.name.c_str());
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "存储 uart_name 失败: %s", esp_err_to_name(err));
+            all_success = false;
+        }
+    }
+
+    // 4. 设置配置类型标记，便于读取时识别
+    err = nvs_set_str(handle, "config_type", "UartConfig");
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "存储配置类型标记失败: %s", esp_err_to_name(err));
+    }
+
+    // 5. 提交更改
+    if (all_success) {
+        err = nvs_commit(handle);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "提交UartConfig失败: %s", esp_err_to_name(err));
+            all_success = false;
+        } else {
+            ESP_LOGI(TAG, "SUartConfig保存到命名空间 '%s' 成功", namespace_name);
+        }
+    } else {
+        ESP_LOGW(TAG, "SUartConfig保存到命名空间 '%s' 部分失败", namespace_name);
+    }
+
+    // 6. 关闭句柄
+    nvs_close(handle);
+    return all_success;
+}
+
+// 从指定命名空间读取SUartConfig
+SUartConfig CConfig::readUartConfig() {
+    char* namespace_name = "UartCfg";
+    SUartConfig config; // 使用结构体的默认构造函数初始化
+    nvs_handle_t handle;
+    esp_err_t err;
+
+    // 1. 打开指定命名空间
+    err = nvs_open(namespace_name, NVS_READONLY, &handle);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "无法打开命名空间 '%s': %s", namespace_name, esp_err_to_name(err));
+        return config;  // 返回默认配置
+    }
+
+    // 2. 检查配置类型 (可选，但推荐用于区分配置)
+    char config_type[32];
+    size_t config_type_len = sizeof(config_type);
+    err = nvs_get_str(handle, "config_type", config_type, &config_type_len);
+    if (err == ESP_OK && strcmp(config_type, "UartConfig") != 0) {
+        ESP_LOGW(TAG, "命名空间 '%s' 中的配置类型不匹配", namespace_name);
+    }
+
+    // 3. 读取整数字段
+    int32_t temp_val = 0;
+    err = nvs_get_i32(handle, "uart_number", &temp_val);
+    if (err == ESP_OK) {
+        config.number = temp_val;
+    }
+
+    err = nvs_get_i32(handle, "uart_baud", &temp_val);
+    if (err == ESP_OK) {
+        config.baud_rate = temp_val;
+    }
+
+    err = nvs_get_i32(handle, "uart_stopbit", &temp_val);
+    if (err == ESP_OK) {
+        config.stop_bit = temp_val;
+    }
+
+    err = nvs_get_i32(handle, "uart_parity", &temp_val);
+    if (err == ESP_OK) {
+        config.parity = temp_val;
+    }
+
+    // 4. 读取字符串字段 (uart_name)
+    size_t required_size = 0;
+    err = nvs_get_str(handle, "uart_name", NULL, &required_size);
+    if (err == ESP_OK) {
+        char* buffer = new char[required_size];
+        err = nvs_get_str(handle, "uart_name", buffer, &required_size);
+        if (err == ESP_OK) {
+            config.name = buffer;
+        }
+        delete[] buffer;
+    }
+
+    // 5. 关闭句柄
+    nvs_close(handle);
+
+    ESP_LOGI(TAG, "从命名空间 '%s' 读取UartConfig完成", namespace_name);
     return config;
 }

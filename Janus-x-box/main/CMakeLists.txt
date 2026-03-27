@@ -7,10 +7,13 @@ idf_component_register(
         "protocol/CChannelEspIdfUart.cpp"
         "protocol/CMonitProtocol.cpp"
         "protocol/CConfig.cpp"
+        "driver/CDs3231.cpp"
         "protocol/CBlockQueue.hpp"
         "protocol/CProtocol.hpp"
+
 
         INCLUDE_DIRS
         "."
         "protocol"
+        "driver"
 )
