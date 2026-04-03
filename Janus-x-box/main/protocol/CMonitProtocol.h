@@ -37,7 +37,8 @@ public:
     CMonitProtocol();
     ~CMonitProtocol();
 
-    SMsg parse(const SDataPacket& packet) override;
+    SMsg decode(const SDataPacket& packet) override;
+    bool encode(SMsg& msg, uint8_t* data, int* len) override;
 private:
 
 };

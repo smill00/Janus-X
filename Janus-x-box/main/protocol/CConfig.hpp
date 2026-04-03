@@ -17,6 +17,9 @@ enum LISTEN_MODE {
     LISTEN_ETHERNET
 };
 
+#define AP_CONFIG_NAME "ap_config"
+#define ETH_CONFIG_NAME "eth_config"
+
 struct SSystemConfig {
     std::string name;
     std::string version;
@@ -39,8 +42,6 @@ struct SUartConfig {
     int baud_rate;
     int stop_bit;
     int parity;
-
-    std::string name;
 };
 
 class CConfig

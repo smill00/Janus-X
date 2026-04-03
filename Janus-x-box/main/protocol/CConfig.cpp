@@ -203,7 +203,7 @@ SSystemConfig CConfig::readSystemConfig() {
 
     err = nvs_get_i8(handle, "mode", &temp);
     if (err == ESP_OK) {
-        cfg.mode = temp;
+        cfg.mode = static_cast<LISTEN_MODE>(temp);
     }
 
     err = nvs_get_i8(handle, "ch_def", &temp);
@@ -429,15 +429,6 @@ bool CConfig::writeUartConfig( const SUartConfig& config) {
         all_success = false;
     }
 
-    // 3. 存储字符串字段 (uart_name)
-    if (!config.name.empty()) {
-        err = nvs_set_str(handle, "uart_name", config.name.c_str());
-        if (err != ESP_OK) {
-            ESP_LOGE(TAG, "存储 uart_name 失败: %s", esp_err_to_name(err));
-            all_success = false;
-        }
-    }
-
     // 4. 设置配置类型标记，便于读取时识别
     err = nvs_set_str(handle, "config_type", "UartConfig");
     if (err != ESP_OK) {
@@ -504,18 +495,6 @@ SUartConfig CConfig::readUartConfig() {
     err = nvs_get_i32(handle, "uart_parity", &temp_val);
     if (err == ESP_OK) {
         config.parity = temp_val;
-    }
-
-    // 4. 读取字符串字段 (uart_name)
-    size_t required_size = 0;
-    err = nvs_get_str(handle, "uart_name", NULL, &required_size);
-    if (err == ESP_OK) {
-        char* buffer = new char[required_size];
-        err = nvs_get_str(handle, "uart_name", buffer, &required_size);
-        if (err == ESP_OK) {
-            config.name = buffer;
-        }
-        delete[] buffer;
     }
 
     // 5. 关闭句柄

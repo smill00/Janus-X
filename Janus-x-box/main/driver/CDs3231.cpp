@@ -136,7 +136,7 @@ esp_err_t CDs3231::setTime(const ds3231_time_t* time) {
 }
 
 // 设置时间（参数格式）
-esp_err_t CDs3231::set_time(uint8_t year, uint8_t month, uint8_t date,
+esp_err_t CDs3231::setTime(uint8_t year, uint8_t month, uint8_t date,
                           uint8_t hours, uint8_t minutes, uint8_t seconds, uint8_t day) {
     ds3231_time_t time = {
         .seconds = seconds,
@@ -148,7 +148,7 @@ esp_err_t CDs3231::set_time(uint8_t year, uint8_t month, uint8_t date,
         .year = year
     };
 
-    return set_time(&time);
+    return setTime(&time);
 }
 
 // 读取时间
@@ -187,5 +187,5 @@ esp_err_t CDs3231::get_time(ds3231_time_t* time) {
 // 简化函数：直接设置当前时间
 esp_err_t CDs3231::set_now(uint8_t year, uint8_t month, uint8_t day,
                           uint8_t hour, uint8_t min, uint8_t sec) {
-    return set_time(year, month, day, hour, min, sec, 1);
+    return setTime(year, month, day, hour, min, sec, 1);
 }

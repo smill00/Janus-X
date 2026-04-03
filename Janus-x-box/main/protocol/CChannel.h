@@ -24,7 +24,7 @@ public:
 #if TARGE_PLATFORM_POSIX
     bool writeData(const char *data, int len);
 #else
-    virtual bool writeData(const char *data, int len) = 0;
+    virtual bool writeData(const uint8_t *data, int len) = 0;
 #endif
 
     virtual std::string descr() = 0;

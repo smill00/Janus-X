@@ -8,7 +8,6 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
-#include <atomic>
 
 #include "CBlockQueue.hpp"
 #include "CChannel.h"
@@ -47,9 +46,31 @@ public:
     CProtocol(SProtocolConfig cfg) : m_channel(nullptr), m_running(false),m_cfg(cfg) {}
     virtual ~CProtocol(){}
 
-    virtual T parse(const SDataPacket& packet) = 0;
+    virtual T decode(const SDataPacket& packet) = 0;
+    virtual bool encode(T& msg, uint8_t* data, int* len) = 0;
+
+    static uint8_t calculateChecksum(const uint8_t* data, int length) {
+        uint8_t sum = 0;
+        for (int i = 0; i < length; ++i) {
+            sum += data[i];
+        }
+        return sum;
+    }
+
     virtual T pull() {
         return m_queue.pop();
+    }
+
+    void push(T msg) {
+        uint8_t* data = nullptr;
+        int data_len = 0;
+        if (encode(msg, data, &data_len)) {
+            m_channel->writeData(data, data_len);
+        }
+
+        if (data) {
+            delete data;
+        }
     }
 
     bool start() {
@@ -119,7 +140,7 @@ public:
         return true;
     }
 
-    int build_key_from_bytes(const uint8_t* data, size_t byte_count, EByteSort mode) {
+    static int build_key_from_bytes(const uint8_t* data, size_t byte_count, EByteSort mode) {
         int result = 0;
 
         if (byte_count > 4) {

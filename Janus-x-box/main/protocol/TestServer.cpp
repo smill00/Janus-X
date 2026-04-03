@@ -5,8 +5,7 @@
 #include "CConfig.hpp"
 
 
-server::server()
-{
+server::server() {
     m_protocol = new CMonitProtocol;
 }
 
@@ -24,11 +23,8 @@ bool server::start()
     {
         while (true) {
             SMsg msg = m_protocol->pull();
-            if (m_state == DISCONNECTED || m_state == LISTENING)
-            {
-                if (msg.type != HANDSHAKE) {
-                    continue;
-                }
+            if (msg.type != HANDSHAKE && m_state == DISCONNECTED) {
+                continue;
             }
 
             switch (msg.type) {
@@ -36,7 +32,7 @@ bool server::start()
                 {
                     handshake(msg);
                 }break;
-            case START_LISTEN:
+            case CONFIG_SERIAL:
                 {
                     handshake(msg);
                 }break;
@@ -71,27 +67,52 @@ void server::handshake(SMsg& message) {
 
     SSystemConfig cfg = CConfig::readSystemConfig();
 
-    SMsg res_msg;
-    uint8_t * res_data = nullptr;
+    SMsg res_msg{};
+    res_msg.nc = cfg.mode;
+    res_msg.key = message.key;
+    res_msg.len = cfg.mode == LISTEN_SERIAL ? 8 : 10;
+    res_msg.data = new uint8_t[res_msg.len];
 
     if (cfg.mode == LISTEN_SERIAL) {
         SUartConfig uart_cfg = CConfig::readUartConfig();
-
-        res_data = new uint8_t[8];
-        res_msg.len = 8;
-        res_msg.data = res_data;
-        res_msg.nc = LISTEN_SERIAL;
-        res_msg.key = message.key;
-
-        memcpy(res_data, &(uart_cfg.baud_rate), 4);
-        res_data[4] = uart_cfg.stop_bit;
-        res_data[5] = uart_cfg.parity;
-
-
+        memcpy(res_msg.data, &(uart_cfg.baud_rate), 4);
+        res_msg.data[4] = uart_cfg.stop_bit;
+        res_msg.data[5] = uart_cfg.parity;
+        res_msg.data[6] = cfg.ch_def;
+        res_msg.data[7] = 0x01;
+    } else if (cfg.mode == LISTEN_AP) {
+        NetConfig net_cfg = CConfig::readNetConfig(cfg.mode == LISTEN_AP ? AP_CONFIG_NAME : ETH_CONFIG_NAME);
+        int index = 0;
+        memcpy(res_msg.data+index, &(net_cfg.ip), 4);  index += 4;
+        memcpy(res_msg.data+index, &(net_cfg.mac), 6); index += 6;
+        memcpy(res_msg.data+index, &(net_cfg.gateway), 4);  index += 4;
+        memcpy(res_msg.data+index, &(net_cfg.netmask), 4);  index += 4;
+        memcpy(res_msg.data+index, &(net_cfg.dns), 4);  index += 4;
+        res_msg.data[index] = cfg.ch_def; index += 1;
+        res_msg.data[index] = 0x01;
     }
 
-
+    m_protocol->push(res_msg);
     delete message.data;
+    m_state = STANDBY;
+}
+
+void server::handConfigUart(SMsg& message) {
+    SUartConfig uart_cfg;
+    int index = 0;
+    uart_cfg.baud_rate = CMonitProtocol::build_key_from_bytes(message.data, 4, CMonitProtocol::E_BIG);
+    uart_cfg.stop_bit = message.data[4];
+    uart_cfg.parity = message.data[5];
+
+    SSystemConfig sys_cfg = CConfig::readSystemConfig();
+    if (sys_cfg.ch_def != message.data[6])
+    {
+        sys_cfg.ch_def = message.data[6];
+        CConfig::writeSystemConfig(sys_cfg);
+    }
+
+    CConfig::writeUartConfig(uart_cfg);
+
 }
 
 

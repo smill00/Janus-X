@@ -17,11 +17,11 @@ public:
 private:
     void reset();
     void handshake(SMsg& message);
+    void handConfigUart(SMsg& message);
 
     CMonitProtocol* m_protocol = nullptr;
     std::thread m_worker;
     EState m_state = DISCONNECTED;
 };
-
 
 #endif // TESTSERVER_HPP
