@@ -6,13 +6,12 @@
 
 const char* CChannelEspIdfUart::TAG = "CChannelEspIdfUart";
 
-CChannelEspIdfUart::CChannelEspIdfUart(uart_port_t uart_num, int tx_pin, int rx_pin,int baud_rate, int buf_size, int read_size):
-      CChannel(buf_size, read_size),
+CChannelEspIdfUart::CChannelEspIdfUart(uart_port_t uart_num, int tx_pin, int rx_pin,int baud_rate):Channel(std::to_string(uart_num)),
       m_uart_num(uart_num),
       m_tx_pin(tx_pin),
       m_rx_pin(rx_pin),
       m_baud_rate(baud_rate),
-      m_esp_buf_size(buf_size)
+      m_esp_buf_size(100)
 {
 
 }
@@ -25,9 +24,7 @@ std::string CChannelEspIdfUart::descr() {
 }
 
 bool CChannelEspIdfUart::init() {
-    if (m_is_init) {
-        unInit();
-    }
+    unInit();
 
     esp_err_t err;
 
@@ -80,17 +77,4 @@ bool CChannelEspIdfUart::unInit() {
     }
     ESP_LOGI(TAG, "UART%d deinitialized", m_uart_num);
     return true;
-}
-
-int CChannelEspIdfUart::readToBuf(char* data, int size) {
-    // ESP-IDF uart_read_bytes是阻塞调用，会等待直到有数据可读或超时
-    // 使用portMAX_DELAY表示无限等待
-    int length = uart_read_bytes(m_uart_num, (uint8_t*)data, size, portMAX_DELAY);
-
-    if (length < 0) {
-        ESP_LOGE(TAG, "uart_read_bytes error");
-        return -1;
-    }
-
-    return length;
 }

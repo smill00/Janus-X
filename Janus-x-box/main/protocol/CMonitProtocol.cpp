@@ -6,24 +6,21 @@
 
 #include <cstring>
 
-CMonitProtocol::CMonitProtocol():
-CProtocol(SProtocolConfig{E_BIG, HEAD,3}) {}
+CMonitProtocol::CMonitProtocol(Channel* ch):CProtocol(SProtocolConfig{E_BIG, HEAD,3}, ch){}
 
-CMonitProtocol::~CMonitProtocol()
-{
-}
+CMonitProtocol::~CMonitProtocol() = default;
 
-SMsg CMonitProtocol::decode(const SDataPacket& packet) {
-    SMsg msg;
+SMsg CMonitProtocol::decode(SDataPacket& packet) {
+    SMsg msg{};
     msg.type = packet.fundata[2];
-    msg.key = build_key_from_bytes(packet.fundata+4, 4, E_BIG);
+    msg.key = CUtils::intFromBytes(packet.fundata+4, 4, E_BIG);
     msg.data = packet.data;
     msg.len = packet.data_len;
     return msg;
 }
 
-bool CMonitProtocol::encode(SMsg& msg, uint8_t* data, int* len) {
-    data = new uint8_t[3+2+6+msg.len+1];
+uint8_t* CMonitProtocol::encode(SMsg& msg, int* len) {
+    auto* data = new uint8_t[3+2+6+msg.len+1];
     int index = 0;
     memcpy(data+index, HEAD, 3);  index += 3;
     memcpy(data+index, &(msg.len), 2);  index += 2;
@@ -36,6 +33,5 @@ bool CMonitProtocol::encode(SMsg& msg, uint8_t* data, int* len) {
     data[index] = checksum;
 
     *len = (3+2+6+msg.len+1);
-
-    return true;
+    return data;
 }

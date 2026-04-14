@@ -392,7 +392,7 @@ NetConfig CConfig::readNetConfig(const char* namespace_name) {
 
 // 写入SUartConfig到指定命名空间
 bool CConfig::writeUartConfig( const SUartConfig& config) {
-    char* namespace_name = "UartCfg";
+    const char* namespace_name = "UartCfg";
     nvs_handle_t handle;
     esp_err_t err;
     bool all_success = true;
@@ -455,8 +455,8 @@ bool CConfig::writeUartConfig( const SUartConfig& config) {
 
 // 从指定命名空间读取SUartConfig
 SUartConfig CConfig::readUartConfig() {
-    char* namespace_name = "UartCfg";
-    SUartConfig config; // 使用结构体的默认构造函数初始化
+    const char* namespace_name = "UartCfg";
+    SUartConfig config{}; // 使用结构体的默认构造函数初始化
     nvs_handle_t handle;
     esp_err_t err;
 

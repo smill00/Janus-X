@@ -5,11 +5,11 @@
 #ifndef CCHANNELESPIDFUART_H
 #define CCHANNELESPIDFUART_H
 
-#include "CChannel.h"
+#include "Channel.hpp"
 #include "driver/uart.h"
 #include "esp_log.h"
 
-class CChannelEspIdfUart : public CChannel {
+class CChannelEspIdfUart : public Channel {
 public:
     /**
      * @param uart_num       UART端口号 (UART_NUM_0, UART_NUM_1, UART_NUM_2)
@@ -19,14 +19,13 @@ public:
      * @param buf_size       内部缓冲区大小
      * @param read_size      每次读取的数据大小
      */
-    CChannelEspIdfUart(uart_port_t uart_num, int tx_pin, int rx_pin, int baud_rate, int buf_size = 1024, int read_size = 256);
+    CChannelEspIdfUart(uart_port_t uart_num, int tx_pin, int rx_pin, int baud_rate);
     CChannelEspIdfUart(const CChannelEspIdfUart&) = delete;
     CChannelEspIdfUart& operator=(const CChannelEspIdfUart&) = delete;
 
     std::string descr() override;
 
 protected:
-    int readToBuf(char* data, int size) override;
     bool init() override;
     bool unInit() override;
 
@@ -35,6 +34,8 @@ private:
     int m_tx_pin;
     int m_rx_pin;
     int m_baud_rate;
+
+    bool m_is_init = false;
 
     int m_esp_buf_size;
 

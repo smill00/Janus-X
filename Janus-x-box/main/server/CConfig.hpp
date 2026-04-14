@@ -10,6 +10,8 @@
 #include "nvs.h"
 #include "esp_log.h"
 #include <string>
+#include <sstream>
+#include <string.h>
 
 enum LISTEN_MODE {
     LISTEN_SERIAL,

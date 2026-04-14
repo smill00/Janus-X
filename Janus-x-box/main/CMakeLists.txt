@@ -1,20 +1,24 @@
 idf_component_register(
         SRCS
-        "main.cpp"
-        "protocol/autotest_protocol.cpp"
-        "protocol/TestServer.cpp"
-        "protocol/CChannel.cpp"
-        "protocol/CChannelEspIdfUart.cpp"
-        "protocol/CMonitProtocol.cpp"
-        "protocol/CConfig.cpp"
-        "protocol/CUploadProtocol.cpp"
-        "driver/CDs3231.cpp"
+        "server/main.cpp"
+        "server/CConfig.cpp"
+        "server/TestServer.cpp"
 
-        "protocol/CBlockQueue.hpp"
-        "protocol/CProtocol.hpp"
+        "protocol/CMonitProtocol.cpp"
+        "protocol/CUploadProtocol.cpp"
+
+        "driver/CDs3231.cpp"
+        "driver/CChannelEspIdfUart.cpp"
+
+        "protocol_core/BlockingQueu.hpp"
+        "protocol_core/Channel.hpp"
+        "protocol_core/json.hpp"
+        "protocol_core/Utils.hpp"
+        "protocol_core/ProtocolCore.hpp"
 
         INCLUDE_DIRS
-        "."
-        "protocol"
         "driver"
+        "protocol"
+        "protocol_core"
+        "server"
 )

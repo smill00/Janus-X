@@ -6,7 +6,7 @@
 
 
 server::server() {
-    m_protocol = new CMonitProtocol;
+    m_protocol = new CMonitProtocol(nullptr);
 }
 
 server::~server() {
@@ -100,7 +100,7 @@ void server::handshake(SMsg& message) {
 void server::handConfigUart(SMsg& message) {
     SUartConfig uart_cfg;
     int index = 0;
-    uart_cfg.baud_rate = CMonitProtocol::build_key_from_bytes(message.data, 4, CMonitProtocol::E_BIG);
+    uart_cfg.baud_rate = CUtils::intFromBytes(message.data, 4);
     uart_cfg.stop_bit = message.data[4];
     uart_cfg.parity = message.data[5];
 

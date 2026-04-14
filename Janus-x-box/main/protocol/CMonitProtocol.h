@@ -5,7 +5,7 @@
 #ifndef CMONITPROTOCOL_H
 #define CMONITPROTOCOL_H
 
-#include "CProtocol.hpp"
+#include "ProtocolCore.hpp"
 
 struct SMsg {
     uint8_t type;
@@ -34,11 +34,11 @@ static uint8_t HEAD[3] = {0x5A,0x1A,0x5A};
 
 class CMonitProtocol : public CProtocol<SMsg>{
 public:
-    CMonitProtocol();
+    CMonitProtocol(Channel* ch);
     ~CMonitProtocol();
 
-    SMsg decode(const SDataPacket& packet) override;
-    bool encode(SMsg& msg, uint8_t* data, int* len) override;
+    SMsg decode(SDataPacket &packet) override;
+    uint8_t* encode(SMsg &msg, int *len) override;
 private:
 
 };
