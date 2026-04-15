@@ -6,7 +6,7 @@
 
 #include <cstring>
 
-CMonitProtocol::CMonitProtocol(Channel* ch):CProtocol(SProtocolConfig{E_BIG, HEAD,3}, ch){}
+CMonitProtocol::CMonitProtocol(Channel* ch):CProtocol(ch){}
 
 CMonitProtocol::~CMonitProtocol() = default;
 
@@ -34,4 +34,20 @@ uint8_t* CMonitProtocol::encode(SMsg& msg, int* len) {
 
     *len = (3+2+6+msg.len+1);
     return data;
+}
+
+CProtocol<SMsg>::SProtocolConfig CMonitProtocol::protocolCfg() {
+    static auto* head = new uint8_t[3];
+    head[0] = 0x5A;
+    head[1] = 0x1A;
+    head[2] = 0x5A;
+    static SProtocolConfig cfg {
+        E_BIG,
+        head,
+        3,
+        8,
+        0,
+        2
+    };
+    return cfg;
 }

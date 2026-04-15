@@ -35,10 +35,18 @@ public:
         uint8_t crc;
     };
 
-    CProtocol(SProtocolConfig cfg, Channel *channel) : m_channel(channel), m_running(false), m_cfg(cfg) {
+    CProtocol(Channel *channel) : m_channel(channel), m_running(false) {
+        if (m_channel != nullptr) {
+            m_channel->init();
+        }
     }
 
     virtual ~CProtocol() {
+        if (m_channel != nullptr)
+        {
+            m_channel->unInit();
+        }
+
         m_running = false;
         if (m_worker.joinable()) {
             m_worker.join();
@@ -78,6 +86,8 @@ public:
     }
 
     bool start() {
+        m_cfg = protocolCfg();
+
         m_worker = std::thread([this]() {
             enum ParseState {
                 E_HEAD,
@@ -141,6 +151,7 @@ public:
 protected:
     virtual T decode(SDataPacket &packet) = 0;
     virtual uint8_t* encode(T &msg, int *len) = 0;
+    virtual SProtocolConfig protocolCfg() = 0;
 
     Channel *m_channel;
     bool m_running;

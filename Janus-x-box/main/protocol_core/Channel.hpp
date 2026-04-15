@@ -74,9 +74,10 @@ public:
 
     virtual std::string descr() = 0;
 
-protected:
     virtual bool init() = 0;
     virtual bool unInit() = 0;
+protected:
+
 
     int m_fd = -1;
 

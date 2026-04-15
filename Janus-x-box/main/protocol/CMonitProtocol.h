@@ -39,6 +39,7 @@ public:
 
     SMsg decode(SDataPacket &packet) override;
     uint8_t* encode(SMsg &msg, int *len) override;
+    SProtocolConfig protocolCfg()override;
 private:
 
 };
